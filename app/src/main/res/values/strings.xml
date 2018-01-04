@@ -1,0 +1,7 @@
+<resources>
+	<string name="app_name">Auto Lolli Radio</string>
+	<string name="automatic_switch">Automatic Mode</string>
+	<string name="preference_radio_station_spinner_index">preference_radio_station_spinner_index</string>
+	<string name="preference_bonded_bluetooth_devices_spinner_index">preference_bonded_bluetooth_devices_spinner_index</string>
+	<string name="preference_auto_mode_switch">preference_auto_mode_switch</string>
+</resources>
