@@ -14,6 +14,12 @@ public class PlayButtonListener implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        this.mediaPlayer.play();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mediaPlayer.play();
+            }
+        });
+        thread.start();
     }
 }

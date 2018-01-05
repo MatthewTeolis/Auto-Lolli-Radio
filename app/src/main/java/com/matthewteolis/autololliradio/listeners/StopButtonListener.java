@@ -14,6 +14,12 @@ public class StopButtonListener implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        this.mediaPlayer.stop();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mediaPlayer.stop();
+            }
+        });
+        thread.start();
     }
 }
