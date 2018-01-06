@@ -3,11 +3,15 @@ package com.matthewteolis.autololliradio;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.matthewteolis.autololliradio.adapters.BluetoothSpinnerAdapter;
 import com.matthewteolis.autololliradio.adapters.RadioStationSpinnerAdapter;
@@ -26,6 +31,7 @@ import com.matthewteolis.autololliradio.listeners.RadioStationListener;
 import com.matthewteolis.autololliradio.listeners.StopButtonListener;
 import com.matthewteolis.autololliradio.receivers.BluetoothConnectedReceiver;
 import com.matthewteolis.autololliradio.receivers.BluetoothDisconnectedReceiver;
+import com.matthewteolis.autololliradio.receivers.NetworkReceiver;
 import com.matthewteolis.autololliradio.receivers.PhoneReceiver;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothConnectedReceiver bluetoothConnectedReceiver;
     private BluetoothDisconnectedReceiver bluetoothDisconnectedReceiver;
     private PhoneReceiver phoneReceiver;
+    private NetworkReceiver networkReceiver;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -70,12 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
             initBluetoothSpinner(mBluetoothAdapter);
-
-            bluetoothConnectedReceiver = new BluetoothConnectedReceiver(mediaPlayer, automationSettings);
-            bluetoothDisconnectedReceiver = new BluetoothDisconnectedReceiver(mediaPlayer, automationSettings);
-
-            registerReceiver(bluetoothConnectedReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
-            registerReceiver(bluetoothDisconnectedReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+            initBluetoothReceiver();
         }
 
         if (!hasPhonePermission()) {
@@ -83,6 +85,21 @@ public class MainActivity extends AppCompatActivity {
         } else {
             initPhoneReceiver();
         }
+
+        initNetworkReceiver();
+    }
+
+    private void initBluetoothReceiver() {
+        bluetoothConnectedReceiver = new BluetoothConnectedReceiver(mediaPlayer, automationSettings);
+        bluetoothDisconnectedReceiver = new BluetoothDisconnectedReceiver(mediaPlayer, automationSettings);
+
+        registerReceiver(bluetoothConnectedReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
+        registerReceiver(bluetoothDisconnectedReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+    }
+
+    private void initNetworkReceiver() {
+        networkReceiver = new NetworkReceiver(mediaPlayer);
+        registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private void initPhoneReceiver() {
@@ -178,10 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -190,5 +204,6 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(bluetoothConnectedReceiver);
         unregisterReceiver(bluetoothDisconnectedReceiver);
         unregisterReceiver(phoneReceiver);
+        unregisterReceiver(networkReceiver);
     }
 }
